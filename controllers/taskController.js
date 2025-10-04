@@ -52,7 +52,7 @@ const getAllTasks = async (req, res) => {
 
 const editTask = async (req, res) => {
   try {
-    const task = { ...req.body, userId: req.user.id, taskId: req.params.id };
+    const task = { ...req.body, userId: req.user.id};
     if (!task.userId) {
       return res.status(400).json({
         success: false,
@@ -60,7 +60,7 @@ const editTask = async (req, res) => {
       });
     }
     const updatedTask = await Task.findOneAndUpdate(
-      { _id: task.taskId, userId: task.userId },
+      { _id: task._id, userId: task.userId },
       req.body,
       { new: true }
     );
