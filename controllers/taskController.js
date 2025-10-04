@@ -78,6 +78,28 @@ const editTask = async (req, res) => {
   }
 };
 
+
+
+const toggleComplete = async (req, res) => {
+  try {
+    const todo = await Task.findById(req.params.id);
+    if(!todo){
+      return res.status(400).json({success: false, message: "Task not found"});
+    }
+
+    todo.isCompleted = !todo.isCompleted;
+    await todo.save();
+    return res.status(200).json({sucess: true, message: "Task updated successfully", data: todo})
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({
+      success: false,
+      message: "Error in updating toggle",
+    });
+  }
+};
+
+
 const deleteTask = async (req, res) => {
   try {
     const task = { userId: req.user.id, taskId: req.params.id };
@@ -106,4 +128,4 @@ const deleteTask = async (req, res) => {
 };
 
 
-export default { createTask, editTask ,getAllTasks, deleteTask };
+export default { createTask, editTask ,getAllTasks, deleteTask, toggleComplete };
