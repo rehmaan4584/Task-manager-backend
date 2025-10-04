@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 dotenv.config({ path: "./.env" });
-
-import express from "express"
+import cors from "cors";
+import express from "express";
 import userRoutes from "./routes/userRoute.js"
 import authRoutes from "./routes/authRoute.js"
 import taskRoutes from "./routes/taskRoutes.js";
@@ -10,6 +10,7 @@ import { connectRedis } from "./lib/redis.js";
 
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 await connectDB();

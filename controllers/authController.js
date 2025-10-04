@@ -72,6 +72,7 @@ const loginUser = async (req, res) => {
       success: true,
       message: "User logged in successfully",
       token,
+      user
 
     });
   } catch (error) {
