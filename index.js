@@ -1,5 +1,5 @@
 import dotenv from "dotenv"
-dotenv.config({ path: "./.env" });
+dotenv.config({ path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development' });
 import cors from "cors";
 import express from "express";
 import userRoutes from "./routes/userRoute.js"
@@ -24,6 +24,6 @@ app.use('/api',userRoutes);
 app.use('/api/task',taskRoutes);
 
 
-app.listen(PORT,()=>{
+app.listen(PORT,"0.0.0.0",()=>{
     console.log(`app is listening on ${PORT}`);
 })
