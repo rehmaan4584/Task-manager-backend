@@ -33,7 +33,7 @@ const getAllTasks = async (req, res) => {
         message: "User id is required",
       });
     }
-    const allTasks = await Task.find();
+    const allTasks = await Task.find({ userId: req.user.id });
     return res.status(200).json({
       success: true,
       message: "All tasks fetched successfully",
@@ -48,11 +48,9 @@ const getAllTasks = async (req, res) => {
   }
 };
 
-
-
 const editTask = async (req, res) => {
   try {
-    const task = { ...req.body, userId: req.user.id};
+    const task = { ...req.body, userId: req.user.id };
     if (!task.userId) {
       return res.status(400).json({
         success: false,
@@ -60,10 +58,17 @@ const editTask = async (req, res) => {
       });
     }
     const updatedTask = await Task.findOneAndUpdate(
-      { _id: task._id, userId: task.userId },
-      req.body,
-      { new: true }
+      { _id: req.params.id, userId: req.user.id },
+      { taskName: req.body.taskName },
+      { new: true },
     );
+
+    if (!updatedTask) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found or unauthorized",
+      });
+    }
     return res.status(200).json({
       success: true,
       message: "Task updated successfully",
@@ -78,18 +83,25 @@ const editTask = async (req, res) => {
   }
 };
 
-
-
 const toggleComplete = async (req, res) => {
   try {
-    const todo = await Task.findById(req.params.id);
-    if(!todo){
-      return res.status(400).json({success: false, message: "Task not found"});
+    const todo = await Task.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+    if (!todo) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Task not found" });
     }
 
     todo.isCompleted = !todo.isCompleted;
     await todo.save();
-    return res.status(200).json({sucess: true, message: "Task updated successfully", data: todo})
+    return res.status(200).json({
+      success: true,
+      message: "Task updated successfully",
+      data: todo,
+    });
   } catch (error) {
     console.error(error);
     return res.status(400).json({
@@ -98,7 +110,6 @@ const toggleComplete = async (req, res) => {
     });
   }
 };
-
 
 const deleteTask = async (req, res) => {
   try {
@@ -109,10 +120,15 @@ const deleteTask = async (req, res) => {
         message: "User id is required",
       });
     }
-    const deletedTask = await Task.findOneAndDelete(
-      { _id: task.taskId, userId: task.userId },
-
-    );
+    const deletedTask = await Task.findOneAndDelete({
+      _id: task.taskId,
+      userId: task.userId,
+    });
+    if (!deletedTask) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
+    }
     return res.status(200).json({
       success: true,
       message: "Task deleted successfully",
@@ -127,5 +143,10 @@ const deleteTask = async (req, res) => {
   }
 };
 
-
-export default { createTask, editTask ,getAllTasks, deleteTask, toggleComplete };
+export default {
+  createTask,
+  editTask,
+  getAllTasks,
+  deleteTask,
+  toggleComplete,
+};
