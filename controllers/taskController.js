@@ -1,8 +1,9 @@
 import Task from "../models/tasks.js";
+import reminderQueue from "../queues/reminderQueue.js";
 
 const createTask = async (req, res) => {
   try {
-    const task = { ...req.body, userId: req.user.id };
+    const task = { ...req.body, userId: req.user.id, willCompleteAt: req.body.willCompleteAt };
     if (!task.userId) {
       return res.status(400).json({
         success: false,
@@ -10,6 +11,22 @@ const createTask = async (req, res) => {
       });
     }
     const createdTask = await Task.create(task);
+    if(task.willCompleteAt) {
+      const delay = new Date(task.willCompleteAt).getTime() - Date.now();
+      if(delay > 0) {
+        await reminderQueue.add(
+          "reminder-job", 
+          {
+            taskId: createdTask._id,   
+            userId: req.user.id,
+          },
+          {
+            delay, 
+          }
+        );
+      }
+    }
+    console.log("Reminder job added successfully");
     return res.status(201).json({
       success: true,
       message: "Task created successfully",

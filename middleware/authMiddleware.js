@@ -16,9 +16,11 @@ export const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ success: false, message: "Invalid Token" });
     }
   } catch (error) {
-    console.error(error);
-    return res
-      .status(401)
-      .json({ success: false, message: "Token verification failed" });
+    if (error?.name === "TokenExpiredError") {
+      return res.status(401).json({ success: false, message: "Token expired" });
+    }
+    // Keep logs minimal to avoid spamming stack traces for auth failures.
+    console.error("Token verification failed:", error?.message ?? error);
+    return res.status(401).json({ success: false, message: "Token verification failed" });
   }
 };

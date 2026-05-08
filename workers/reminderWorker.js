@@ -1,0 +1,50 @@
+import { Worker } from "bullmq";
+import connection from "../config/bullmqRedis.js";
+import Task from "../models/tasks.js";
+import connectDB from "../config/db.js";
+
+await connectDB(); 
+
+const REMINDER_CHANNEL = "reminder:events";
+
+const reminderWorker = new Worker("reminder-queue", async (job) => {
+    console.log("Reminder job started");
+    console.log("Processing Job:", job.id); 
+    try {
+        const { taskId} = job.data;
+        const task = await Task.findById(taskId);
+        if (!task) {
+            throw new Error("Task not found");
+        }
+
+        // Worker runs in a separate process, so we can't access the in-memory Socket.IO server.
+        // Publish via Redis; the main server will forward it to the Socket.IO user room.
+        const message = task?.taskName
+          ? `Reminder: ${task.taskName}`
+          : "Reminder for task";
+
+        await connection.publish(
+          REMINDER_CHANNEL,
+          JSON.stringify({
+            userId: task.userId?.toString?.() ?? String(task.userId),
+            message,
+            taskId: task._id?.toString?.() ?? String(task._id),
+          }),
+        );
+    } catch (error) {
+        console.error("Error in reminder worker:", error?.message);
+    }
+
+}, {
+    connection,
+});
+
+reminderWorker.on("completed", (job) => {
+    console.log(`✅ Job completed: ${job.id}`);
+});
+
+reminderWorker.on("failed", (job, err) => {
+    console.error(`❌ Job failed: ${job.id}`, err);
+});
+
+export default reminderWorker;
