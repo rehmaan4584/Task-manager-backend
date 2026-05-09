@@ -1,32 +1,70 @@
 import Task from "../models/tasks.js";
 import reminderQueue from "../queues/reminderQueue.js";
 
+const validateReminderDate = (rawReminderDate) => {
+  if (!rawReminderDate) return { isValid: true, parsedDate: null };
+
+  const parsedDate = new Date(rawReminderDate);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return {
+      isValid: false,
+      message: "Invalid reminder date format",
+    };
+  }
+
+  if (parsedDate.getTime() <= Date.now()) {
+    return {
+      isValid: false,
+      message: "Reminder date must be in the future",
+    };
+  }
+
+  return { isValid: true, parsedDate };
+};
+
 const createTask = async (req, res) => {
   try {
-    const task = { ...req.body, userId: req.user.id, willCompleteAt: req.body.willCompleteAt };
+    const task = {
+      ...req.body,
+      userId: req.user.id,
+      willCompleteAt: req.body.willCompleteAt,
+    };
     if (!task.userId) {
       return res.status(400).json({
         success: false,
         message: "User id is required",
       });
     }
+
+    const reminderValidation = validateReminderDate(task.willCompleteAt);
+    if (!reminderValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: reminderValidation.message,
+      });
+    }
+
     const createdTask = await Task.create(task);
-    if(task.willCompleteAt) {
-      const delay = new Date(task.willCompleteAt).getTime() - Date.now();
-      if(delay > 0) {
+    if (task.willCompleteAt && reminderValidation.parsedDate) {
+      const delay = reminderValidation.parsedDate.getTime() - Date.now();
+      if (delay > 0) {
         await reminderQueue.add(
-          "reminder-job", 
+          "reminder-job",
           {
-            taskId: createdTask._id,   
+            taskId: createdTask._id,
             userId: req.user.id,
           },
           {
-            delay, 
-          }
+            delay,
+          },
         );
       }
     }
-    console.log("Reminder job added successfully");
+
+    if (task.willCompleteAt) {
+      console.log("Reminder job added successfully");
+    }
+
     return res.status(201).json({
       success: true,
       message: "Task created successfully",

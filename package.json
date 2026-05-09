@@ -16,8 +16,14 @@
 		"uuid": "^11.1.0"
 	},
 	"scripts": {
-		"start": "node index.js",
-		"dev": "nodemon index.js"
+		"start": "NODE_ENV=production node index.js",
+		"dev": "NODE_ENV=development nodemon index.js",
+		"worker": "NODE_ENV=production node workers/reminderWorker.js",
+		"worker:dev": "NODE_ENV=development nodemon workers/reminderWorker.js",
+		"start:api": "npm run start",
+		"start:worker": "npm run worker",
+		"dev:api": "npm run dev",
+		"dev:worker": "npm run worker:dev"
 	},
 	"type": "module",
 	"packageManager": "pnpm@10.6.1+sha512.40ee09af407fa9fbb5fbfb8e1cb40fbb74c0af0c3e10e9224d7b53c7658528615b2c92450e74cfad91e3a2dcafe3ce4050d80bda71d757756d2ce2b66213e9a3"

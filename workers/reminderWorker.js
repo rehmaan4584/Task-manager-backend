@@ -8,10 +8,10 @@ await connectDB();
 const REMINDER_CHANNEL = "reminder:events";
 
 const reminderWorker = new Worker("reminder-queue", async (job) => {
-    console.log("Reminder job started");
-    console.log("Processing Job:", job.id); 
+    console.log(`[ReminderWorker] started jobId=${job.id}`);
     try {
         const { taskId} = job.data;
+        console.log(`[ReminderWorker] loading task taskId=${taskId}`);
         const task = await Task.findById(taskId);
         if (!task) {
             throw new Error("Task not found");
@@ -31,8 +31,12 @@ const reminderWorker = new Worker("reminder-queue", async (job) => {
             taskId: task._id?.toString?.() ?? String(task._id),
           }),
         );
+        console.log(
+          `[ReminderWorker] published reminder channel=${REMINDER_CHANNEL} jobId=${job.id} userId=${task.userId?.toString?.() ?? String(task.userId)}`
+        );
     } catch (error) {
-        console.error("Error in reminder worker:", error?.message);
+        console.error(`[ReminderWorker] job failed jobId=${job.id} error=${error?.message}`);
+        throw error;
     }
 
 }, {

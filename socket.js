@@ -1,11 +1,23 @@
 import { Server } from "socket.io";
 import IORedis from "ioredis";
+import dotenv from "dotenv";
+
+dotenv.config({
+  path: process.env.NODE_ENV === "production" ? ".env.production" : ".env.development",
+});
 
 let io;
 let subscriber;
 let subscribed = false;
 
 const REMINDER_CHANNEL = "reminder:events";
+const redisSubscriberOptions = process.env.REDIS_URL
+  ? process.env.REDIS_URL
+  : {
+      host: process.env.REDIS_HOST || "127.0.0.1",
+      port: Number(process.env.REDIS_PORT || 6379),
+      maxRetriesPerRequest: null,
+    };
 
 export const initSocket = (server) => {
   io = new Server(server, {
@@ -26,11 +38,7 @@ export const initSocket = (server) => {
   // Bridge reminders from BullMQ worker (separate process) to Socket.IO.
   // The worker publishes to Redis; this server subscribes and forwards to the user room.
   if (!subscriber) {
-    subscriber = new IORedis({
-      host: "localhost",
-      port: 6379,
-      maxRetriesPerRequest: null,
-    });
+    subscriber = new IORedis(redisSubscriberOptions);
 
     subscriber.on("connect", () => {
       console.log("IORedis subscriber connected");
@@ -53,6 +61,9 @@ export const initSocket = (server) => {
           message: data?.message ?? "Reminder for task",
           taskId: data?.taskId,
         });
+        console.log(
+          `[SocketBridge] forwarded reminder channel=${channel} userId=${userId} taskId=${data?.taskId ?? "unknown"}`
+        );
       } catch (e) {
         console.error("Invalid reminder payload:", e?.message);
       }
