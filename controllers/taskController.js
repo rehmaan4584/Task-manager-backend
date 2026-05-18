@@ -45,14 +45,20 @@ const createTask = async (req, res) => {
     }
 
     const createdTask = await Task.create(task);
-    if (task.willCompleteAt && reminderValidation.parsedDate) {
-      const delay = reminderValidation.parsedDate.getTime() - Date.now();
+    if (task.willCompleteAt && (reminderValidation.parsedDate || req.body.delayMs)) {
+      // Prioritize delayMs from frontend to avoid clock skew
+      const delay = (typeof req.body.delayMs === 'number') 
+        ? req.body.delayMs 
+        : (reminderValidation.parsedDate.getTime() - Date.now());
+
       console.log({
-  currentTime: new Date().toISOString(),
-  reminderTime: reminderValidation.parsedDate.toISOString(),
-  delayMs: delay,
-  delayMinutes: delay / 1000 / 60,
-});
+        currentTime: new Date().toISOString(),
+        reminderTime: reminderValidation.parsedDate ? reminderValidation.parsedDate.toISOString() : "delay-only",
+        delayMs: delay,
+        delayMinutes: delay / 1000 / 60,
+        source: (typeof req.body.delayMs === 'number') ? "frontend-delay" : "backend-calc"
+      });
+
       if (delay > 0) {
         await reminderQueue.add(
           "reminder-job",
