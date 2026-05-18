@@ -2,6 +2,7 @@ import { Worker } from "bullmq";
 import { redisConnectionOptions } from "../config/bullmqRedis.js";
 import Task from "../models/tasks.js";
 import connectDB from "../config/db.js";
+import IORedis from "ioredis";
 
 await connectDB(); 
 
