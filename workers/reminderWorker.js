@@ -1,11 +1,12 @@
 import { Worker } from "bullmq";
-import connection from "../config/bullmqRedis.js";
+import { redisConnectionOptions } from "../config/bullmqRedis.js";
 import Task from "../models/tasks.js";
 import connectDB from "../config/db.js";
 
 await connectDB(); 
 
 const REMINDER_CHANNEL = "reminder:events";
+const pubConnection = new IORedis(redisConnectionOptions);
 
 const reminderWorker = new Worker("reminder-queue", async (job) => {
     console.log(`[ReminderWorker] started jobId=${job.id}`);
@@ -23,7 +24,7 @@ const reminderWorker = new Worker("reminder-queue", async (job) => {
           ? `Reminder: ${task.taskName}`
           : "Reminder for task";
 
-        await connection.publish(
+        await pubConnection.publish(
           REMINDER_CHANNEL,
           JSON.stringify({
             userId: task.userId?.toString?.() ?? String(task.userId),
@@ -40,7 +41,7 @@ const reminderWorker = new Worker("reminder-queue", async (job) => {
     }
 
 }, {
-    connection,
+    connection: redisConnectionOptions,
 });
 
 reminderWorker.on("completed", (job) => {
