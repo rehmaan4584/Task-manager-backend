@@ -11,6 +11,10 @@ const pubConnection = new IORedis(redisConnectionOptions);
 
 const reminderWorker = new Worker("reminder-queue", async (job) => {
     console.log(`[ReminderWorker] started jobId=${job.id}`);
+    console.log(
+  "JOB FIRED AT:",
+  new Date().toISOString()
+);
     try {
         const { taskId} = job.data;
         console.log(`[ReminderWorker] loading task taskId=${taskId}`);

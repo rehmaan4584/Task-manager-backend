@@ -47,6 +47,12 @@ const createTask = async (req, res) => {
     const createdTask = await Task.create(task);
     if (task.willCompleteAt && reminderValidation.parsedDate) {
       const delay = reminderValidation.parsedDate.getTime() - Date.now();
+      console.log({
+  currentTime: new Date().toISOString(),
+  reminderTime: reminderValidation.parsedDate.toISOString(),
+  delayMs: delay,
+  delayMinutes: delay / 1000 / 60,
+});
       if (delay > 0) {
         await reminderQueue.add(
           "reminder-job",
