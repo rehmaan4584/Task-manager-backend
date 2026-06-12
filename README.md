@@ -2,6 +2,16 @@
 
 Scalable backend for a full-stack task manager featuring JWT auth, Redis-backed sessions, BullMQ reminder jobs, and Socket.IO real-time notifications.
 
+## Live URLs (deployed on AWS EC2)
+
+| Service | URL |
+|---------|-----|
+| API | http://16.16.198.166:5000/api |
+| Health | http://16.16.198.166:5000/api/health |
+| Socket.IO | http://16.16.198.166:5000 |
+
+**Frontend:** http://16.16.198.166:3000
+
 ## Why This Project
 
 This backend was built to showcase practical backend engineering for portfolio and remote-job readiness:
@@ -36,7 +46,8 @@ This backend was built to showcase practical backend engineering for portfolio a
 
 ## API Endpoints
 
-Base URL: `http://localhost:5000/api`
+Base URL (local): `http://localhost:5000/api`  
+Base URL (production): `http://16.16.198.166:5000/api`
 
 ### Auth
 - `POST /auth/register`
