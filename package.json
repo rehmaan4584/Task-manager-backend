@@ -1,30 +1,30 @@
 {
-	"dependencies": {
-		"bcrypt": "^6.0.0",
-		"bullmq": "^5.71.1",
-		"config": "^4.1.1",
-		"cors": "^2.8.5",
-		"dotenv": "^17.2.1",
-		"express": "^5.1.0",
-		"ioredis": "^5.10.1",
-		"jsonwebtoken": "^9.0.2",
-		"mongodb": "^6.19.0",
-		"mongoose": "^8.18.0",
-		"nodemon": "^3.1.10",
-		"redis": "^5.8.2",
-		"socket.io": "^4.8.3",
-		"uuid": "^11.1.0"
-	},
-	"scripts": {
-		"start": "NODE_ENV=production node index.js",
-		"dev": "NODE_ENV=development nodemon index.js",
-		"worker": "NODE_ENV=production node workers/reminderWorker.js",
-		"worker:dev": "NODE_ENV=development nodemon workers/reminderWorker.js",
-		"start:api": "npm run start",
-		"start:worker": "npm run worker",
-		"dev:api": "npm run dev",
-		"dev:worker": "npm run worker:dev"
-	},
-	"type": "module",
-	"packageManager": "pnpm@10.6.1+sha512.40ee09af407fa9fbb5fbfb8e1cb40fbb74c0af0c3e10e9224d7b53c7658528615b2c92450e74cfad91e3a2dcafe3ce4050d80bda71d757756d2ce2b66213e9a3"
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bullmq": "^5.71.1",
+    "config": "^4.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "ioredis": "^5.10.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.19.0",
+    "mongoose": "^8.18.0",
+    "nodemon": "^3.1.10",
+    "redis": "^5.8.2",
+    "socket.io": "^4.8.3",
+    "uuid": "^11.1.0"
+  },
+  "scripts": {
+    "start": "node init && NODE_ENV=production node index.js",
+    "dev": "node init && NODE_ENV=development nodemon index.js",
+    "worker": "NODE_ENV=production node workers/reminderWorker.js",
+    "worker:dev": "NODE_ENV=development nodemon workers/reminderWorker.js",
+    "start:api": "node init && npm run start",
+    "start:worker": "node init && npm run worker",
+    "dev:api": "node init && npm run dev",
+    "dev:worker": "node init && npm run worker:dev"
+  },
+  "type": "module",
+  "packageManager": "pnpm@10.6.1+sha512.40ee09af407fa9fbb5fbfb8e1cb40fbb74c0af0c3e10e9224d7b53c7658528615b2c92450e74cfad91e3a2dcafe3ce4050d80bda71d757756d2ce2b66213e9a3"
 }
